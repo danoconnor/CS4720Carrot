@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.06" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="42dp"
+            android:text="Schedule Planning for Next Semester"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <Button
+            android:id="@+id/addTakenButton"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:layout_alignLeft="@+id/offeredClassesButton"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="100dp"
+            android:text="Add Classes Taken" />
+
+        <Button
+            android:id="@+id/offeredClassesButton"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:layout_above="@+id/addTakenButton"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="22dp"
+            android:text="See Offered Classes" />
+
+        <Button
+            android:id="@+id/currentSchedButton"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:layout_above="@+id/offeredClassesButton"
+            android:layout_alignLeft="@+id/offeredClassesButton"
+            android:layout_marginBottom="17dp"
+            android:text="See Current Schedule" />
+
+    </RelativeLayout>
+
+</LinearLayout>
