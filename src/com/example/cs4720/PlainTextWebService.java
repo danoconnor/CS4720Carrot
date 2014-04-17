@@ -18,10 +18,10 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class WebServiceTask extends AsyncTask<String, Void, JSONObject> {
+public class PlainTextWebService extends AsyncTask<String, Void, String> {
 
 	@Override
-	protected JSONObject doInBackground(String... params) {
+	protected String doInBackground(String... params) {
 		String url = params[0];
 		
 		InputStream is = null;
@@ -48,38 +48,14 @@ public class WebServiceTask extends AsyncTask<String, Void, JSONObject> {
             String line = null;
             while ((line = reader.readLine()) != null)
             {
-            		//line = line.replaceAll("\"", "");
                     sb.append(line + "\n");
                     Log.i("LINE", "LOOPING");
             }
             is.close();
 
             String result=sb.toString();
-            
-            if (result.indexOf("projectID") > 0)
-            {
-            	String id = "";
-            	
-            	int index = result.indexOf(":") + 1;
-            	while (Character.isDigit(result.charAt(index)))
-            	{
-            		id += result.charAt(index);
-            		index ++;
-            	}
-            	
-            	result = "{projectID:" + id + "}";
-            }
-            
-            Log.i("RESPOSNE", result);
-            
-			if (result.length() > 0)
-			{
-				return new JSONObject(result);
-			}
-			else
-			{
-				return null;
-			}
+            Log.i("GOT RESULT", result);
+            return result;
 		} catch (Exception e)
 		{
 			Log.e("ERROR CALLING WEB SERVICE", e.toString());
