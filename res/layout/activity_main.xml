@@ -9,22 +9,11 @@
     tools:context=".MainActivity" >
 
     <TextView
-        android:id="@+id/welcomeHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="63dp"
-        android:text="Welcome!"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
         android:id="@+id/usernameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/welcomeHeader"
-        android:layout_marginTop="63dp"
+        android:layout_marginTop="550dp"
+        android:layout_alignLeft="@+id/imageView1"       
         android:text="Username"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -34,8 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/usernameTV"
         android:layout_alignBottom="@+id/usernameTV"
-        android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/usernameTV"
+        android:layout_alignRight="@+id/imageView1" 
         android:ems="10" >
 
         <requestFocus />
@@ -43,22 +32,31 @@
 
     <Button
         android:id="@+id/loginButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/welcomeHeader"
-        android:layout_alignRight="@+id/welcomeHeader"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
         android:layout_below="@+id/usernameLoginField"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="42dp"
         android:text="Login" />
 
     <Button
         android:id="@+id/createUserButton"
         style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
         android:layout_below="@+id/loginButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:text="Create User" />
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:adjustViewBounds="true"
+        android:scaleType="center"
+        android:src="@drawable/front" />
 
 </RelativeLayout>

@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				setContentView(R.layout.pick_class_for_rating);
-				initializePickClassForRatingPage(username);
+				initializePickClassForRatingPage(username);	
 			}
 		});
 

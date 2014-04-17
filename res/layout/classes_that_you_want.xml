@@ -9,8 +9,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="Classes That You Want"
+        android:text="Classes I Plan to Take"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+    
+    <TextView
+        android:id="@+id/info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:layout_centerHorizontal="true"
+        android:text="Create a list of classes you would like to take, based on ratings, professor, etc."
+        android:textAppearance="?android:attr/textAppearanceSmall"
+    	android:gravity="center" />
 
     <ListView
         android:id="@+id/listView"
@@ -18,34 +28,9 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textView1"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/header" >
+        android:layout_below="@+id/info" >
 
     </ListView>
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="154dp"
-        android:layout_marginLeft="29dp"
-        android:paddingTop = "30dp"
-        android:text="Add Class:"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/classField"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView1"
-        android:layout_alignBottom="@+id/textView1"
-        android:layout_marginLeft="19dp"
-        android:layout_toRightOf="@+id/textView1"
-        android:ems="10" >
-
-        <requestFocus />
-    </EditText>
 
     <Button
         android:id="@+id/addButton"
@@ -55,5 +40,27 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
         android:text="Add" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="124dp"
+        android:paddingTop="30dp"
+        android:paddingLeft="30dp"
+        android:text="Add Class:"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/classField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView1"
+        android:layout_alignBottom="@+id/textView1"
+		android:layout_toRightOf="@+id/textView1"
+        android:layout_alignParentRight="true"
+        android:ems="10" />
 
 </RelativeLayout>
