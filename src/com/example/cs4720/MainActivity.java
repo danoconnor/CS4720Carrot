@@ -184,7 +184,7 @@ public class MainActivity extends Activity {
 			// TODO update to the proper web service
 			JSONObject result = new WebServiceTask().execute(
 					"http://plato.cs.virginia.edu/~cs4720s14carrot/getclasses/"
-							+ requirement).get();
+							+ requirement + "/" + username).get();
 
 			if (result != null) {
 				Iterator<String> it = (Iterator<String>) (result.keys());
@@ -312,12 +312,15 @@ public class MainActivity extends Activity {
 		departmentField.setText(dept);
 		final EditText courseNumField = (EditText) findViewById(R.id.courseNumField);
 		courseNumField.setText(c);
+		final ArrayList<String> data = new ArrayList<String>();
+		final ButtonAdapter adapter = new ButtonAdapter(this, data, null);
+		final GridView gView = (GridView) findViewById(R.id.reqsGridView);
 
 		addClassButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				String deparment = departmentField.getText().toString()
+				String department = departmentField.getText().toString()
 						.toUpperCase();
 				String courseNum = courseNumField.getText().toString();
 
@@ -326,13 +329,14 @@ public class MainActivity extends Activity {
 
 				try {
 					JSONObject result = new WebServiceTask().execute(url,
-							"department", deparment, "courseNum", courseNum)
+							"department", department, "courseNum", courseNum)
 							.get();
 					String isSuccess = (String) (result.get("success"));
 					Log.i("SUCCESS?", isSuccess);
 					if (isSuccess.equals("true")) {
-						setContentView(R.layout.view_classes);
-						initializeViewClassesPage();
+						adapter.add(department + courseNum);
+						gView.setAdapter(adapter);
+						
 					} else {
 						departmentField.setText("");
 						courseNumField.setText("");
@@ -351,6 +355,42 @@ public class MainActivity extends Activity {
 				mgr.hideSoftInputFromWindow(courseNumField.getWindowToken(), 0);
 			}
 		});
+		
+		try {
+			JSONObject result = new WebServiceTask().execute(
+					"http://plato.cs.virginia.edu/~cs4720s14carrot/taken/"
+							+ username).get();
+
+			if (result != null) {
+				ArrayList<String> alreadyRated = new ArrayList<String>();
+				JSONObject alreadyRatedResult = new WebServiceTask().execute(
+						"http://plato.cs.virginia.edu/~cs4720s14carrot/alreadyrated/"
+								+ username).get();
+
+				if (alreadyRatedResult != null) {
+					Iterator<String> alreadyIt = (Iterator<String>) (alreadyRatedResult
+							.keys());
+
+					while (alreadyIt.hasNext()) {
+						alreadyRated.add(alreadyIt.next());
+					}
+				}
+
+				Iterator<String> it = (Iterator<String>) (result.keys());
+				while (it.hasNext()) {
+					String className = it.next();
+					data.add(className);
+				}
+
+				gView.setAdapter(adapter);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		state = ADD_CLASS_STATE;
 	}
@@ -946,7 +986,9 @@ public class MainActivity extends Activity {
 				int titleStart = result.indexOf(":", index + 1) + 2;
 				int titleEnd = result.indexOf(",", titleStart + 1) - 1;
 				String title = result.substring(titleStart, titleEnd);
-				data.add(title);
+				if ( ! title.equals("Initiliaze Project") ) {
+					data.add(title);
+				}
 				
 				index = result.indexOf("taskTitle", index + 1);
 			}
