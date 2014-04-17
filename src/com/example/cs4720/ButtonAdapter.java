@@ -39,9 +39,9 @@ public class ButtonAdapter extends BaseAdapter {
         Button button;
         if (convertView == null) {  // if it's not recycled, initialize some attributes
         	button = new Button(mContext);
-        	button.setLayoutParams(new GridView.LayoutParams(195, 190));
-        	button.setPadding(5, 5, 5, 5);
-        	button.setBackgroundResource(R.drawable.bluesquare);
+        	button.setLayoutParams(new GridView.LayoutParams(150, 150));
+        	button.setPadding(8, 8, 8, 8);
+        	button.setBackgroundResource(R.drawable.grid_button_image);
         	button.setTextColor(Color.WHITE);
         } else {
         	button = (Button) convertView;
