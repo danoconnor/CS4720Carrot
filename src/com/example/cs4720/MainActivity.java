@@ -58,6 +58,7 @@ public class MainActivity extends Activity {
 	
 	private String username;
 	private int state;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
