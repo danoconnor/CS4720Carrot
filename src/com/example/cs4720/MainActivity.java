@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -1049,27 +1050,53 @@ public class MainActivity extends Activity {
 	}
 
 	private void initializePickClassForRatingPage(String user) {
+		final Spinner deptSpin = (Spinner) findViewById(R.id.deptSpinner);
+		final Spinner courseSpin = (Spinner) findViewById(R.id.courseNumSpinner);
+		final Spinner profSpin = (Spinner) findViewById(R.id.profSpinner);
+		
+		final HashMap<String, HashMap<String, HashMap<String, String>>> data = new HashMap<String, HashMap<String, HashMap<String, String>>>();
+		
 		try {
 			JSONObject result = new WebServiceTask().execute(
 					"http://plato.cs.virginia.edu/~cs4720s14carrot/classesTaken/"
 							+ user).get();
-
+			
 			if (result != null) {
 				Iterator<String> it = (Iterator<String>) (result.keys());
 
-				ArrayList<String> depts = new ArrayList<String>();
-				ArrayList<String> courseNums = new ArrayList<String>();
-				
-				HashMap<String, HashMap<String, HashMap<String, String>>> data = new HashMap<String, HashMap<String, HashMap<String, String>>>();
+				final ArrayList<String> depts = new ArrayList<String>();
+				final ArrayList<String> courseNums = new ArrayList<String>();
 
 				while (it.hasNext()) {
 					String className = it.next();
 					
 					String dept = className.substring(0, className.length() - 4);
-					String courseNum = className.substring(className.length() - 4);
 					
-					ArrayList<String> profs = new ArrayList<String>();
-					String getProfUrl = "http://plato.cs.virginia.edu/~cs4720s14carrot/";
+					HashMap<String, HashMap<String, String>> courseData;
+					if (data.containsKey(dept))
+					{
+						courseData = data.get(dept);
+					}
+					else
+					{
+						courseData = new HashMap<String, HashMap<String, String>>();
+						data.put(dept, courseData);
+					}
+					
+					String courseNum = className.substring(className.length() - 4);
+					HashMap<String, String> profData;
+					
+					if (courseData.containsKey(courseNum))
+					{
+						profData = courseData.get(courseNum);
+					}
+					else
+					{
+						profData = new HashMap<String, String>();
+						courseData.put(courseNum, profData);
+					}
+					
+					String getProfUrl = "http://plato.cs.virginia.edu/~cs4720s14carrot/getProfessorsForCourse/" + dept + "/" + courseNum;
 					JSONObject profResult = new WebServiceTask().execute(getProfUrl).get();
 					
 					if (profResult != null)
@@ -1080,25 +1107,113 @@ public class MainActivity extends Activity {
 							String profId = profIt.next();
 							String profName = (String) (profResult.getString(profId));
 							
-							
+							profData.put(profId, profName);
 						}
 					}
 				}
-
+				
 				Collections.sort(depts);
-				Collections.sort(courseNums);
 
-				final Spinner deptSpin = (Spinner) findViewById(R.id.deptSpinner);
+				String defaultDept = "";
+				for (String dept : data.keySet())
+				{
+					if (defaultDept.length() == 0)
+					{
+						defaultDept = dept;
+					}
+					
+					depts.add(dept);
+				}
+				
+				String defaultCourse = "";
+				for (String course : data.get(defaultDept).keySet())
+				{
+					if (defaultCourse.length() == 0)
+					{
+						defaultCourse = course;
+					}
+					
+					courseNums.add(course);
+				}
+				
+				Collections.sort(courseNums);
+				final ArrayList<String> profNames = new ArrayList<String>();
+				for (String profId : data.get(defaultDept).get(defaultCourse).keySet())
+				{
+					profNames.add(data.get(defaultDept).get(defaultCourse).get(profId));
+				}
+				
+				Collections.sort(profNames);
+
 				ArrayAdapter<String> deptAdapter = new ArrayAdapter<String>(
 						this, android.R.layout.simple_spinner_item, depts);
 				deptAdapter
 						.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				deptSpin.setAdapter(deptAdapter);
+				deptSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+					@Override
+					public void onItemSelected(AdapterView<?> parent,
+							View view, int position, long id) {
+						courseNums.clear();
+						profNames.clear();
+						
+						String dept= (String)((Spinner)view).getSelectedItem();
+						String defaultCourse = "";
+						for (String course : data.get(dept).keySet())
+						{
+							if (defaultCourse.length() == 0)
+							{
+								defaultCourse = course;
+							}
+							
+							courseNums.add(course);
+						}
+						
+						Collections.sort(courseNums);
+						for (String profId : data.get(dept).get(defaultCourse).keySet())
+						{
+							profNames.add(data.get(dept).get(defaultCourse).get(profId));
+						}
+						
+						Collections.sort(profNames);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> parent) {
+						
+					}
 				
-				final Spinner courseSpin = (Spinner) findViewById(R.id.courseNumSpinner);
+				});
+				
+				
 				ArrayAdapter<String> courseAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, courseNums);
 				courseSpin.setAdapter(courseAdapter);
+				courseSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
 
+					@Override
+					public void onItemSelected(AdapterView<?> parent,
+							View view, int position, long id) {
+						
+						String dept = (String)deptSpin.getSelectedItem();
+						String course = (String)((Spinner)view).getSelectedItem();
+						for (String profId : data.get(dept).get(course).keySet())
+						{
+							profNames.add(data.get(dept).get(course).get(profId));
+						}
+						
+						Collections.sort(profNames);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> parent) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				ArrayAdapter<String> profAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, profNames);
+				profSpin.setAdapter(profAdapter);
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -1110,7 +1225,6 @@ public class MainActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		
 		final SeekBar instSeek = (SeekBar) findViewById(R.id.instructorRatingSeek);
 		final TextView instValue = (TextView) findViewById(R.id.instructorRatingValue);
@@ -1212,7 +1326,7 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		/*final Button submit = (Button) findViewById(R.id.submitRatingButton);
+		final Button submit = (Button) findViewById(R.id.submitRatingButton);
 		submit.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1221,7 +1335,25 @@ public class MainActivity extends Activity {
 				double diffValue = diffSeek.getProgress() / 20.0;
 				double timeValue = timeSeek.getProgress() / 20.0;
 				double interValue = interSeek.getProgress() / 20.0;
-
+				
+				String dept = (String)deptSpin.getSelectedItem();
+				String courseNum = (String)courseSpin.getSelectedItem();
+				String profName = (String)profSpin.getSelectedItem();
+				
+				HashMap<String, String> profData = data.get(dept).get(courseNum);
+				
+				String profId = "";
+				for (String pId : profData.keySet())
+				{
+					if (profData.get(pId).equals(profName))
+					{
+						profId = pId;
+						break;
+					}
+				}
+				
+				Log.i("RATING CLASS", dept + courseNum + ": " + profName + " (" + profId + ")");
+				
 				String url = "http://plato.cs.virginia.edu/~cs4720s14carrot/rate/"
 						+ username
 						+ "/"
@@ -1229,7 +1361,7 @@ public class MainActivity extends Activity {
 						+ "/"
 						+ courseNum
 						+ "/"
-						+ prof
+						+ profId
 						+ "/"
 						+ instValue
 						+ "/"
@@ -1250,7 +1382,7 @@ public class MainActivity extends Activity {
 				setContentView(R.layout.view_classes);
 				initializeViewClassesPage();
 			}
-		});*/
+		});
 		
 		state = PICK_RATING_STATE;
 	}
