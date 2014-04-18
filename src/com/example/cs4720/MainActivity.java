@@ -22,10 +22,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -184,7 +187,7 @@ public class MainActivity extends Activity {
 			// TODO update to the proper web service
 			JSONObject result = new WebServiceTask().execute(
 					"http://plato.cs.virginia.edu/~cs4720s14carrot/getclasses/"
-							+ requirement).get();
+							+ requirement + "/" + username).get();
 
 			if (result != null) {
 				Iterator<String> it = (Iterator<String>) (result.keys());
@@ -257,10 +260,15 @@ public class MainActivity extends Activity {
 		});
 
 		OnClickListener listener = new OnClickListener() {
-
+			
 			@Override
-			public void onClick(View v) {
-				// TODO
+			public void onClick(View view) {
+				String className = ((Button) view).getText().toString();
+				String dept = className.substring(0, className.length() - 4);
+				String courseNum = className.substring(className.length() - 4);
+				
+				setContentView(R.layout.view_rating);
+				initializeViewRatingPage(dept, courseNum);
 			}
 		};
 
@@ -312,12 +320,29 @@ public class MainActivity extends Activity {
 		departmentField.setText(dept);
 		final EditText courseNumField = (EditText) findViewById(R.id.courseNumField);
 		courseNumField.setText(c);
+		final ArrayList<String> data = new ArrayList<String>();
+		
+		OnClickListener listener = new OnClickListener() {
+			
+			@Override
+			public void onClick(View view) {
+				String className = ((Button) view).getText().toString();
+				String dept = className.substring(0, className.length() - 4);
+				String courseNum = className.substring(className.length() - 4);
+				
+				setContentView(R.layout.view_rating);
+				initializeViewRatingPage(dept, courseNum);
+			}
+		};
+		
+		final ButtonAdapter adapter = new ButtonAdapter(this, data, listener);
+		final GridView gView = (GridView) findViewById(R.id.reqsGridView);
 
 		addClassButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				String deparment = departmentField.getText().toString()
+				String department = departmentField.getText().toString()
 						.toUpperCase();
 				String courseNum = courseNumField.getText().toString();
 
@@ -326,13 +351,14 @@ public class MainActivity extends Activity {
 
 				try {
 					JSONObject result = new WebServiceTask().execute(url,
-							"department", deparment, "courseNum", courseNum)
+							"department", department, "courseNum", courseNum)
 							.get();
 					String isSuccess = (String) (result.get("success"));
 					Log.i("SUCCESS?", isSuccess);
 					if (isSuccess.equals("true")) {
-						setContentView(R.layout.view_classes);
-						initializeViewClassesPage();
+						adapter.add(department + courseNum);
+						gView.setAdapter(adapter);
+						
 					} else {
 						departmentField.setText("");
 						courseNumField.setText("");
@@ -351,163 +377,44 @@ public class MainActivity extends Activity {
 				mgr.hideSoftInputFromWindow(courseNumField.getWindowToken(), 0);
 			}
 		});
+		
+		try {
+			JSONObject result = new WebServiceTask().execute(
+					"http://plato.cs.virginia.edu/~cs4720s14carrot/taken/"
+							+ username).get();
 
-		state = ADD_CLASS_STATE;
-	}
+			if (result != null) {
+				ArrayList<String> alreadyRated = new ArrayList<String>();
+				JSONObject alreadyRatedResult = new WebServiceTask().execute(
+						"http://plato.cs.virginia.edu/~cs4720s14carrot/alreadyrated/"
+								+ username).get();
 
-	private void initializeRatingForm(String className) {
-		final TextView header = (TextView) findViewById(R.id.header2);
-		header.setText("Add rating for " + className);
+				if (alreadyRatedResult != null) {
+					Iterator<String> alreadyIt = (Iterator<String>) (alreadyRatedResult
+							.keys());
 
-		final String dept = className.substring(0, className.length() - 4);
-		final String courseNum = className.substring(className.length() - 4);
-		final String prof = "mss2x"; // TODO handle professors properly
-
-		final SeekBar instSeek = (SeekBar) findViewById(R.id.instructorRatingSeek);
-		final TextView instValue = (TextView) findViewById(R.id.instructorRatingValue);
-		instSeek.setProgress(50);
-		instValue.setText("50");
-		instSeek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				Log.i("Progressed changed", progress + "");
-				instValue.setText(progress + "");
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		final SeekBar diffSeek = (SeekBar) findViewById(R.id.difficultRatingSeek);
-		final TextView diffValue = (TextView) findViewById(R.id.difficultRatingValue);
-		diffSeek.setProgress(50);
-		diffValue.setText("50");
-		diffSeek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				Log.i("Progressed changed", progress + "");
-				diffValue.setText(progress + "");
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		final SeekBar timeSeek = (SeekBar) findViewById(R.id.timeRatingSeek);
-		final TextView timeValue = (TextView) findViewById(R.id.timeRatingValue);
-		timeSeek.setProgress(50);
-		timeValue.setText("50");
-		timeSeek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				Log.i("Progressed changed", progress + "");
-				timeValue.setText(progress + "");
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		final SeekBar interSeek = (SeekBar) findViewById(R.id.interestRatingSeek);
-		final TextView interValue = (TextView) findViewById(R.id.interestRatingValue);
-		interSeek.setProgress(50);
-		interValue.setText("50");
-		interSeek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				Log.i("Progressed changed", progress + "");
-				interValue.setText(progress + "");
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
-		final Button submit = (Button) findViewById(R.id.submitRatingButton);
-		submit.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				double instValue = instSeek.getProgress() / 20.0;
-				double diffValue = diffSeek.getProgress() / 20.0;
-				double timeValue = timeSeek.getProgress() / 20.0;
-				double interValue = interSeek.getProgress() / 20.0;
-
-				String url = "http://plato.cs.virginia.edu/~cs4720s14carrot/rate/"
-						+ username
-						+ "/"
-						+ dept
-						+ "/"
-						+ courseNum
-						+ "/"
-						+ prof
-						+ "/"
-						+ instValue
-						+ "/"
-						+ diffValue
-						+ "/"
-						+ timeValue
-						+ "/" + interValue;
-				try {
-					new WebServiceTask().execute(url).get();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					while (alreadyIt.hasNext()) {
+						alreadyRated.add(alreadyIt.next());
+					}
 				}
 
-				setContentView(R.layout.view_classes);
-				initializeViewClassesPage();
-			}
-		});
+				Iterator<String> it = (Iterator<String>) (result.keys());
+				while (it.hasNext()) {
+					String className = it.next();
+					data.add(className);
+				}
 
-		state = RATING_FORM_STATE;
+				gView.setAdapter(adapter);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		state = ADD_CLASS_STATE;
 	}
 
 	private void initializeLoginPage() {
@@ -515,6 +422,17 @@ public class MainActivity extends Activity {
 		final Button createUserButton = (Button) findViewById(R.id.createUserButton);
 		final EditText userNameField = (EditText) findViewById(R.id.usernameLoginField);
 
+		final TextView userNameTV = (TextView) findViewById(R.id.usernameTV);
+		RelativeLayout.LayoutParams layout = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		int marginTop = (int)(Math.round((double)(size.y) / 4.0));
+		layout.setMargins(0, marginTop, 0, 0);
+		userNameTV.setLayoutParams(layout);
+		
 		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.hideSoftInputFromWindow(userNameField.getWindowToken(), 0);
 
@@ -642,13 +560,18 @@ public class MainActivity extends Activity {
 									|| value.charAt(i) == '.') {
 								currentRating += value.charAt(i);
 							} else {
-								ratingsList.add(currentRating);
+								
+								double ratingDouble = Double.parseDouble(currentRating);
+								ratingDouble = Math.round(ratingDouble * 100) / 100.0;
+								ratingsList.add(ratingDouble + "");
 								currentRating = new String();
 							}
 						}
 
 						if (currentRating.length() > 0) {
-							ratingsList.add(currentRating);
+							double ratingDouble = Double.parseDouble(currentRating);
+							ratingDouble = Math.round(ratingDouble * 100) / 100.0;
+							ratingsList.add(ratingDouble + "");
 						}
 
 						RelativeLayout.LayoutParams rowLayout = new RelativeLayout.LayoutParams(
@@ -676,7 +599,7 @@ public class MainActivity extends Activity {
 
 						TextView intRating = new TextView(this);
 						intRating
-								.setText("Difficulty Rating (1=easy, 5 = hard): "
+								.setText("Interest Rating: "
 										+ ratingsList.get(3));
 						intRating.setLayoutParams(rowLayout);
 						linearLayout.addView(intRating);
@@ -892,41 +815,7 @@ public class MainActivity extends Activity {
 
 		state = CREATE_USER_STATE;
 	}
-
-	private void initializePlanPage() {
-		final Button addButton = (Button) findViewById(R.id.addTakenButton);
-		addButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				setContentView(R.layout.add_class_form);
-				initializeAddClassForm("", "");
-			}
-		});
-
-		final Button seeOffered = (Button) findViewById(R.id.offeredClassesButton);
-		seeOffered.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				setContentView(R.layout.fulfillreq);
-				initializeNextSemesterPage();
-			}
-		});
-		
-		final Button planButton = (Button) findViewById(R.id.planButton);
-		planButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				setContentView(R.layout.classes_that_you_want);
-				initializeWantClassesPage();
-			}
-		});
-
-		state = PLAN_STATE;
-	}
-
+	
 	private void initializeWantClassesPage()
 	{
 		final EditText classField = (EditText) findViewById(R.id.classField);
@@ -946,7 +835,9 @@ public class MainActivity extends Activity {
 				int titleStart = result.indexOf(":", index + 1) + 2;
 				int titleEnd = result.indexOf(",", titleStart + 1) - 1;
 				String title = result.substring(titleStart, titleEnd);
-				data.add(title);
+				if ( ! title.equals("Initiliaze Project") ) {
+					data.add(title);
+				}
 				
 				index = result.indexOf("taskTitle", index + 1);
 			}
@@ -990,69 +881,18 @@ public class MainActivity extends Activity {
 		state = WANT_STATE;
 	}
 	
-	private void initializeNextSemesterPage() {
-		final TextView header = (TextView) findViewById(R.id.header);
-		header.setText("Classes for Fall 2014");
-
-		// call web service and get list of results that meet the requirement
-		// for each result, add a row to the LinearLayout with the class name,
-		// button to add class, button to view class ratings
-
-		try {
-			// TODO update to the proper web service
-			JSONObject result = new WebServiceTask()
-					.execute(
-							"http://plato.cs.virginia.edu/~cs4720s14carrot/getclasses/")
-					.get();
-			if (result != null) {
-				Iterator<String> it = (Iterator<String>) (result.keys());
-
-				ArrayList<String> data = new ArrayList<String>();
-
-				while (it.hasNext()) {
-					String className = it.next();
-
-					data.add(className);
-				}
-
-				Collections.sort(data);
-
-				final Spinner spin = (Spinner) findViewById(R.id.fulfillReqSpinner);
-				ArrayAdapter<String> reqAdapter = new ArrayAdapter<String>(
-						this, android.R.layout.simple_spinner_item, data);
-				reqAdapter
-						.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				spin.setAdapter(reqAdapter);
-
-				final Button detailsButton = (Button) findViewById(R.id.seeDetailsButton);
-				detailsButton.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						String c = (String) (spin.getSelectedItem());
-						String dept = c.substring(0, c.length() - 4);
-						String courseNum = c.substring(c.length() - 4);
-
-						setContentView(R.layout.view_rating);
-						initializeViewRatingPage(dept, courseNum);
-					}
-				});
-			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		state = REQ_VIEW_STATE;
-	}
-
 	private void initializePickClassForRatingPage(String user) {
 		final Spinner deptSpin = (Spinner) findViewById(R.id.deptSpinner);
 		final Spinner courseSpin = (Spinner) findViewById(R.id.courseNumSpinner);
 		final Spinner profSpin = (Spinner) findViewById(R.id.profSpinner);
+		
+		final ArrayList<String> depts = new ArrayList<String>();
+		final ArrayList<String> courseNums = new ArrayList<String>();
+		final ArrayList<String> profNames = new ArrayList<String>();
+		
+		final ArrayAdapter<String> deptAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, depts);
+		final ArrayAdapter<String> courseAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, courseNums);
+		final ArrayAdapter<String> profAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, profNames);
 		
 		final HashMap<String, HashMap<String, HashMap<String, String>>> data = new HashMap<String, HashMap<String, HashMap<String, String>>>();
 		
@@ -1064,8 +904,7 @@ public class MainActivity extends Activity {
 			if (result != null) {
 				Iterator<String> it = (Iterator<String>) (result.keys());
 
-				final ArrayList<String> depts = new ArrayList<String>();
-				final ArrayList<String> courseNums = new ArrayList<String>();
+				
 
 				while (it.hasNext()) {
 					String className = it.next();
@@ -1137,18 +976,22 @@ public class MainActivity extends Activity {
 				}
 				
 				Collections.sort(courseNums);
-				final ArrayList<String> profNames = new ArrayList<String>();
+				
 				for (String profId : data.get(defaultDept).get(defaultCourse).keySet())
 				{
-					profNames.add(data.get(defaultDept).get(defaultCourse).get(profId));
+					String name = data.get(defaultDept).get(defaultCourse).get(profId);
+					if (name.trim().length() == 0)
+					{
+						name = "Staff";
+					}
+					
+					profNames.add(name);
 				}
 				
 				Collections.sort(profNames);
 
-				ArrayAdapter<String> deptAdapter = new ArrayAdapter<String>(
-						this, android.R.layout.simple_spinner_item, depts);
-				deptAdapter
-						.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				
+				deptAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				deptSpin.setAdapter(deptAdapter);
 				deptSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
 
@@ -1158,7 +1001,7 @@ public class MainActivity extends Activity {
 						courseNums.clear();
 						profNames.clear();
 						
-						String dept= (String)((Spinner)view).getSelectedItem();
+						String dept= (String)deptSpin.getSelectedItem();
 						String defaultCourse = "";
 						for (String course : data.get(dept).keySet())
 						{
@@ -1171,12 +1014,21 @@ public class MainActivity extends Activity {
 						}
 						
 						Collections.sort(courseNums);
+						courseSpin.setAdapter(courseAdapter);
+						
 						for (String profId : data.get(dept).get(defaultCourse).keySet())
 						{
-							profNames.add(data.get(dept).get(defaultCourse).get(profId));
+							String name = data.get(dept).get(defaultCourse).get(profId);
+							if (name.trim().length() == 0)
+							{
+								name = "Staff";
+							}
+							
+							profNames.add(name);
 						}
 						
 						Collections.sort(profNames);
+						profSpin.setAdapter(profAdapter);
 					}
 
 					@Override
@@ -1187,22 +1039,29 @@ public class MainActivity extends Activity {
 				});
 				
 				
-				ArrayAdapter<String> courseAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, courseNums);
 				courseSpin.setAdapter(courseAdapter);
 				courseSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 					@Override
 					public void onItemSelected(AdapterView<?> parent,
 							View view, int position, long id) {
+						profNames.clear();
 						
 						String dept = (String)deptSpin.getSelectedItem();
-						String course = (String)((Spinner)view).getSelectedItem();
+						String course = (String)courseSpin.getSelectedItem();
 						for (String profId : data.get(dept).get(course).keySet())
 						{
-							profNames.add(data.get(dept).get(course).get(profId));
+							String name = data.get(dept).get(course).get(profId);
+							if (name.trim().length() == 0)
+							{
+								name = "Staff";
+							}
+							
+							profNames.add(name);
 						}
 						
 						Collections.sort(profNames);
+						profSpin.setAdapter(profAdapter);
 					}
 
 					@Override
@@ -1212,7 +1071,6 @@ public class MainActivity extends Activity {
 					}
 				});
 				
-				ArrayAdapter<String> profAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, profNames);
 				profSpin.setAdapter(profAdapter);
 			}
 		} catch (InterruptedException e) {
@@ -1345,14 +1203,14 @@ public class MainActivity extends Activity {
 				String profId = "";
 				for (String pId : profData.keySet())
 				{
-					if (profData.get(pId).equals(profName))
+					if (profData.get(pId).equals(profName) || (profName.equals("Staff") && profData.get(pId).trim().length() == 0))
 					{
 						profId = pId;
 						break;
 					}
 				}
 				
-				Log.i("RATING CLASS", dept + courseNum + ": " + profName + " (" + profId + ")");
+				Log.i("RATING CLASS", dept + courseNum + ": " + profName + " (" + profId + "): " + instValue + ", " + diffValue + ", " + timeValue + ", " + interValue);
 				
 				String url = "http://plato.cs.virginia.edu/~cs4720s14carrot/rate/"
 						+ username

@@ -18,4 +18,8 @@
         <item>2019</item>
         <item>2020</item>
     </string-array>
+    
+    <color name="lightblue">#CAEDFF</color>
+    <color name="orange">#F26522</color>
+    
 </resources>

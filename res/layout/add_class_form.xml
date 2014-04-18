@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="Add Class"
+        android:text="Classes You've Taken"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <ProgressBar
@@ -20,13 +20,25 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/welcomeHeader" />
+    
+    <GridView
+	    android:id="@+id/reqsGridView"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_above="@+id/textView2"
+	    android:layout_below="@+id/progressBar1"
+	    android:columnWidth="200dp"
+	    android:gravity="center"
+	    android:numColumns="auto_fit"
+	    android:stretchMode="columnWidth"
+	    android:verticalSpacing="10dp" />
 
     <TextView
         android:id="@+id/courseNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/departmentField"
-        android:layout_marginTop="21dp"
+        android:layout_marginLeft="200dp"
         android:text="Course Number"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -45,7 +57,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/courseNum"
         android:layout_alignBottom="@+id/courseNum"
-        android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/courseNum"
         android:ems="10"
         android:inputType="number" />
@@ -57,7 +68,6 @@
         android:layout_alignBaseline="@+id/textView2"
         android:layout_alignBottom="@+id/textView2"
         android:layout_alignLeft="@+id/courseNumField"
-        android:layout_alignParentRight="true"
         android:ems="10" />
 
     <TextView
@@ -65,9 +75,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/progressBar1"
-        android:layout_marginTop="27dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="125dp"
         android:layout_toLeftOf="@+id/addClassButton"
+        android:layout_marginLeft="200dp"
         android:text="Department"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

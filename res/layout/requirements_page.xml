@@ -46,8 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/header"
             android:layout_alignParentBottom="true"
-            android:layout_toLeftOf="@+id/rateButton"
-            android:text="Add Classes" />
+            android:text="See Classes Taken" />
 
         <Button
             android:id="@+id/rateButton"
